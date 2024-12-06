@@ -1,0 +1,68 @@
+# Load the dataset
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('/content/tourism dataset.csv')
+print(data.head())
+
+# Data Cleaning
+data.drop_duplicates(inplace=True)
+data.fillna(0, inplace=True)
+
+# Data Manipulation
+data['Total_Visitors'] = data['Domestic_Visitors'] + data['International_Visitors']
+data['Date'] = pd.to_datetime(data['Date'])
+data['Year'] = data['Date'].dt.year
+data['Month'] = data['Date'].dt.month
+
+# Analysis
+months = data['Month'].unique()
+monthly_visitors = {m: data[data['Month'] == m]['Total_Visitors'].sum() for m in months}
+best_month = max(monthly_visitors, key=monthly_visitors.get)
+years = data['Year'].unique()
+yearly_avg_visitors = {y: data[data['Year'] == y]['Total_Visitors'].mean() for y in years}
+visitor_proportion = data.groupby('Year')[['Domestic_Visitors', 'International_Visitors']].sum().apply(lambda x: x/x.sum(), axis=1)
+print(monthly_visitors)
+print()
+print(best_month)
+print(yearly_avg_visitors)
+print(visitor_proportion)
+
+# Visualization
+
+# Bar Chart using plt.bar()
+months = list(monthly_visitors.keys())  # Extract months
+visitors = list(monthly_visitors.values())  # Extract total visitors for each month
+
+plt.bar(months, visitors)
+plt.title('Total Visitors for Each Month')
+plt.xlabel('Month')
+plt.ylabel('Total Visitors')
+plt.legend(['Total Visitors'])
+plt.xticks(rotation=45)  # Rotate x-axis labels for readability if needed
+plt.show()
+
+# Pie Chart using plt.pie()
+# We need to summarize the proportions for Domestic vs International Visitors
+domestic_total = visitor_proportion['Domestic_Visitors'].sum()
+international_total = visitor_proportion['International_Visitors'].sum()
+
+# Plot the pie chart
+plt.pie([domestic_total, international_total], labels=['Domestic', 'International'], autopct='%1.1f%%', startangle=90)
+plt.title('Domestic vs. International Visitors')
+plt.ylabel('')  # Remove the y-label as it's not needed for pie charts
+plt.legend(title="Visitor Type")
+plt.show()
+
+# Line Graph using plt.plot()
+# Extracting years and the corresponding average visitors for each year
+years = list(yearly_avg_visitors.keys())
+avg_visitors = list(yearly_avg_visitors.values())
+
+# Plot the line graph
+plt.plot(years, avg_visitors, marker='o', color='b',label='Average Total Visitors')  # Adding marker for points
+plt.title('Trend of Total Visitors Over the Years')
+plt.xlabel('Year')
+plt.ylabel('Average Total Visitors')
+plt.legend()
+plt.show()
