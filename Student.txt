@@ -1,0 +1,37 @@
+# Load the dataset
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('/content/student dataset (1).csv')
+print(data.head())
+# Data Cleaning
+data.fillna(data.mean(), inplace=True)
+
+
+# Data Manipulation
+data['Avg_Score'] = data[['Math', 'Science', 'English']].mean(axis=1)
+data['Performance'] = pd.cut(data['Avg_Score'], bins=[0, 50, 75, 100], labels=['Low', 'Medium', 'High'])
+print(data.head())
+
+# Analysis
+subject_means = data[['Math', 'Science', 'English']].mean()
+best_subject = subject_means.idxmax()
+performance_counts = data['Performance'].value_counts()
+print(best_subject)
+print(performance_counts)
+
+# Visualization
+# Bar Chart
+subject_means.plot(kind='bar')
+plt.title('Average Score for Each Subject')
+plt.xlabel('Subjects')
+plt.ylabel('Average Score')
+plt.legend(['Average Score'])
+plt.show()
+
+# Pie Chart
+performance_counts.plot(kind='pie', autopct='%1.1f%%')
+plt.title('Students in Each Performance Category')
+plt.legend(performance_counts.index, title="Performance Levels")
+plt.ylabel('')
+plt.show()
