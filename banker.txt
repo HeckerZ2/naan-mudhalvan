@@ -1,0 +1,68 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the dataset into a Pandas DataFrame
+data = pd.read_csv('/content/banker dataset.csv')
+print(data.head())
+
+# Data Cleaning
+data.drop_duplicates(inplace=True)
+data.fillna('Unknown', inplace=True)
+
+# Create a copy of the 'Job' column before encoding for analysis purposes
+data['Original_Job'] = data['Job']
+print(data.head())
+
+# Data Manipulation
+data['Contacted_Last_Month'] = data['Last_Contact_Date'].apply(lambda x: 'Yes' if 'last month' in x else 'No')
+data = pd.get_dummies(data, columns=['Job', 'Marital_Status', 'Education'], drop_first=True)
+
+# Analysis
+subscribed = data[data['Subscribed'] == 'yes']
+avg_age_subscribed = subscribed['Age'].mean()
+common_job_subscribed = subscribed['Original_Job'].mode()[0]
+subscription_rate = data['Subscribed'].value_counts(normalize=True)
+
+# Print the first few rows for verification
+print(data.head())
+print()
+print(subscribed.head())
+print(avg_age_subscribed)
+print(common_job_subscribed)
+print(subscription_rate)
+
+# Visualization
+
+# Bar Chart for subscription rate by job category
+job_subscription_rate = subscribed['Original_Job'].value_counts(normalize=True)
+
+# Using plt.bar() for the bar chart
+plt.bar(job_subscription_rate.index, job_subscription_rate.values)
+plt.title('Subscription Rate by Job Category')
+plt.xlabel('Job Category')
+plt.ylabel('Subscription Rate')
+plt.xticks(rotation=45)  # Rotate x-axis labels if necessary for better readability
+plt.legend(['Subscription Rate'])
+plt.show()
+
+# Pie Chart for proportion of customers who subscribed vs. those who did not
+# Using plt.pie() for the pie chart
+plt.pie(subscription_rate, labels=subscription_rate.index, autopct='%1.1f%%', startangle=90)
+plt.title('Proportion of Customers Who Subscribed vs. Those Who Did Not')
+plt.ylabel('')  # Remove y-axis label
+plt.legend(title="Subscription Status")
+plt.show()
+
+# Histogram for distribution of customer ages
+# Using plt.hist() for the histogram
+plt.hist(data['Age'], bins=20, edgecolor='black')
+plt.title('Distribution of Customer Ages')
+plt.xlabel('Age')
+plt.ylabel('Frequency')
+plt.legend(['Age'])
+plt.show()
+
+# Output the calculated values
+print(f"Average age of customers who subscribed: {avg_age_subscribed}")
+print(f"Most common job category for customers who were contacted and subscribed: {common_job_subscribed}")
+print(f"Proportion of customers who subscribed vs. those who did not:\n{subscription_rate}")
