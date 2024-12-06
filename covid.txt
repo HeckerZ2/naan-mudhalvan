@@ -1,0 +1,64 @@
+# Load the dataset
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('covid_dataset.csv')
+print(data.head())
+
+# Data Cleaning
+data.drop_duplicates(inplace=True)
+data.fillna(0, inplace=True)
+
+
+# Data Manipulation
+data['New_Cases'] = data['Total_Cases'].diff().fillna(0)
+data['Date'] = pd.to_datetime(data['Date'])
+data['Year'] = data['Date'].dt.year
+data['Month'] = data['Date'].dt.month
+data['Day'] = data['Date'].dt.day
+print(data.head())
+
+# Analysis
+total_cases = data['Total_Cases'].sum()
+total_deaths = data['Total_Deaths'].sum()
+top_country_cases = data[['Country', 'Total_Cases']].sort_values(by='Total_Cases', ascending=False).iloc[0]['Country']
+top_country_deaths = data[['Country', 'Total_Deaths']].sort_values(by='Total_Deaths', ascending=False).iloc[0]['Country']
+print(total_cases)
+print(total_deaths)
+print(top_country_cases)
+print(top_country_deaths)
+
+# Visualization
+# Line Chart
+daily_cases = data.groupby('Date')['Total_Cases'].sum()
+
+# Plotting the line chart using plt.plot()
+plt.plot(daily_cases.index, daily_cases.values)
+plt.title('Total COVID-19 Cases Over Time')
+plt.xlabel('Date')
+plt.ylabel('Total Cases')
+plt.legend(['Total Cases'])
+plt.show()
+
+# Bar Chart
+top_5_countries = data[['Country', 'Total_Cases']].sort_values(by='Total_Cases', ascending=False).head(5)
+
+# Plotting the bar chart using plt.bar()
+plt.bar(top_5_countries['Country'], top_5_countries['Total_Cases'])
+#data[['Country', 'Total_Cases']].sort_values(by='Total_Cases', ascending=False).head(5).set_index('Country').plot(kind='bar')
+plt.title('Top 5 Countries with the Highest Cases')
+plt.xlabel('Country')
+plt.ylabel('Total Cases')
+plt.legend(['Total Cases'])
+plt.show()
+
+# Pie Chart
+# Pie Chart
+#data[['Continent', 'Total_Cases']].groupby('Continent').sum().plot(kind='pie', y='Total_Cases', autopct='%1.1f%%') # Specify y='Total_Cases'
+# Grouping data by 'Continent' and summing 'Total_Cases'
+continent_cases = data[['Continent', 'Total_Cases']].groupby('Continent').sum()
+plt.pie(continent_cases['Total_Cases'],  autopct='%1.1f%%', startangle=90)
+plt.title('Proportion of Cases in Different Continents')
+plt.ylabel('')
+plt.legend(continent_cases.index,title="Continents")
+plt.show()
