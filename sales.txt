@@ -1,0 +1,57 @@
+# Load the dataset
+import pandas as pd
+import matplotlib.pyplot as plt
+
+data = pd.read_csv('/content/sales dataset.csv')
+print(data.head())
+
+# Data Cleaning
+data.drop_duplicates(inplace=True)
+data.fillna(0, inplace=True)
+
+# Ensure 'Date' column is in datetime format
+data['Date'] = pd.to_datetime(data['Date'])
+
+# Data Manipulation
+data['Revenue'] = data['Quantity'] * data['Price']
+print(data.head())
+
+# Analysis
+categories = data['Category'].unique()
+category_revenue = {cat: data[data['Category'] == cat]['Revenue'].sum() for cat in categories}
+category_quantity = {cat: data[data['Category'] == cat]['Quantity'].sum() for cat in categories}
+top_products = data[['Product', 'Revenue']].sort_values(by='Revenue', ascending=False).head(3)
+
+# Add 'Month' column from 'Date' for grouping by month
+data['Month'] = data['Date'].dt.month
+
+# Find the month with the highest total revenue
+monthly_revenue = data.groupby('Month')['Revenue'].sum().idxmax()
+print(category_revenue)
+print(category_quantity)
+print(top_products)
+print(monthly_revenue)
+
+# Visualization
+
+categories = list(category_revenue.keys())  # Extract category names
+revenues = list(category_revenue.values())  # Extract total revenue for each category
+
+plt.bar(categories, revenues)
+plt.title('Total Revenue by Category')
+plt.xlabel('Category')
+plt.ylabel('Total Revenue')
+plt.legend(['Total Revenue'])
+plt.show()
+
+# Line Graph for Monthly Sales Trends
+monthly_revenue = data.groupby(data['Date'].dt.to_period('M'))['Revenue'].sum()
+
+# Plotting the line graph using plt.plot()
+plt.figure(figsize=(15, 6))
+plt.plot(monthly_revenue.index.astype(str), monthly_revenue.values)
+plt.title('Monthly Sales Trends')
+plt.xlabel('Date')
+plt.ylabel('Revenue')
+plt.legend(['Revenue'])
+plt.show()
